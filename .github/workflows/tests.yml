@@ -3,22 +3,14 @@ name: tests
 on: ["push", "pull_request"]
 
 jobs:
-    test:
-        runs-on: ${{ matrix.os }}
+    tests:
+        runs-on: ubuntu-latest
         strategy:
             fail-fast: true
             matrix:
-                os: [ubuntu-latest]
-                php: [8.3, 8.4]
-                laravel: [11.*, 12.*]
-                stability: [prefer-stable]
-                include:
-                    - laravel: 12.*
-                      testbench: 10.*
-                    - laravel: 11.*
-                      testbench: 9.*
+                php: ["8.2", "8.3", "8.4"]
 
-        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+        name: PHP ${{ matrix.php }}
 
         steps:
             - name: Checkout code
@@ -32,8 +24,7 @@ jobs:
                   coverage: none
 
             - name: Install dependencies
-              run: |
-                  composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-                  composer update --${{ matrix.stability }} --prefer-dist --no-interaction
-            - name: Execute tests
-              run: composer test
+              run: composer install --no-interaction --prefer-dist --no-progress
+
+            - name: Run tests
+              run: vendor/bin/phpunit

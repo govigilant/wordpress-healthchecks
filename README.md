@@ -7,8 +7,6 @@
 <p>
     <a href="https://github.com/govigilant/wordpress-healthchecks"><img src="https://img.shields.io/github/actions/workflow/status/govigilant/wordpress-healthchecks/tests.yml?label=tests&style=flat-square" alt="Tests"></a>
     <a href="https://github.com/govigilant/wordpress-healthchecks"><img src="https://img.shields.io/github/actions/workflow/status/govigilant/wordpress-healthchecks/analyse.yml?label=analysis&style=flat-square" alt="Analysis"></a>
-    <a href="https://github.com/govigilant/wordpress-healthchecks"><img src="https://img.shields.io/github/actions/workflow/status/govigilant/wordpress-healthchecks/style.yml?label=style&style=flat-square" alt="Style"></a>
-    <a href="https://packagist.org/packages/vigilant/healthchecks"><img src="https://img.shields.io/packagist/dt/vigilant/healthchecks?color=blue&style=flat-square" alt="Total downloads"></a>
 </p>
 
 A WordPress plugin that provides a healthcheck endpoint for any site and integrates seamlessly with [Vigilant](https://github.com/govigilant/vigilant).

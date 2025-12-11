@@ -1,0 +1,13 @@
+# Files and folders excluded from WordPress.org deployments
+/.git/
+/.github/
+/devenv/
+/tests/
+/art/
+/vendor/bin/
+/.gitignore
+/phpunit.xml
+/phpstan.neon
+/composer.json
+/composer.lock
+/README.md

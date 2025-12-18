@@ -10,10 +10,12 @@ use function hash;
 
 final class OptionsTest extends TestCase
 {
+    private const OPTIONS_STORE = 'vigilant_healthchecks_wp_options';
+
     protected function setUp(): void
     {
         parent::setUp();
-        $GLOBALS['wp_options'] = [];
+        $GLOBALS[self::OPTIONS_STORE] = [];
     }
 
     public function testAvailableChecksExposeClassReferences(): void
@@ -100,7 +102,7 @@ final class OptionsTest extends TestCase
 
     private function setOption(string $name, mixed $value): void
     {
-        $GLOBALS['wp_options'][$name] = $value;
+        $GLOBALS[self::OPTIONS_STORE][$name] = $value;
     }
 
 }

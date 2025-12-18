@@ -29,6 +29,7 @@ DB_PASSWORD="${WORDPRESS_DB_PASSWORD:-wordpress}"
 DB_PREFIX="${WORDPRESS_TABLE_PREFIX:-wp_}"
 DB_CHARSET="${WORDPRESS_DB_CHARSET:-utf8mb4}"
 DB_COLLATE="${WORDPRESS_DB_COLLATE:-}"
+DB_SKIP_SSL_VERIFY="${WORDPRESS_DB_SKIP_SSL_VERIFY:-1}"
 
 DB_HOST_ONLY="${DB_HOST%%:*}"
 DB_PORT_PART="${DB_HOST##*:}"
@@ -38,9 +39,14 @@ else
     DB_PORT="$DB_PORT_PART"
 fi
 
+MYSQLADMIN_SSL_FLAGS=()
+if [ "$DB_SKIP_SSL_VERIFY" = "1" ]; then
+    MYSQLADMIN_SSL_FLAGS+=(--skip-ssl-verify-server-cert)
+fi
+
 printf 'Waiting for database connection'
 for attempt in $(seq 1 60); do
-    if mysqladmin ping -h"$DB_HOST_ONLY" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" >/dev/null 2>&1; then
+    if mysqladmin ping -h"$DB_HOST_ONLY" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASSWORD" "${MYSQLADMIN_SSL_FLAGS[@]}" >/dev/null 2>&1; then
         printf '\nDatabase is ready.\n'
         ready=1
         break

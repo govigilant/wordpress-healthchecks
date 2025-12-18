@@ -8,6 +8,8 @@ Stable tag: 1.0.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
+A WordPress plugin that provides healthchecks to your WordPress site that integrate seamlessly with Vigilant (https://govigilant.io).
+
 == Description ==
 Vigilant Healthchecks provides a REST healthcheck endpoint at `/wp-json/vigilant/v1/health` with an admin interface to conrol which checks are executed.
 This plugin is designed to integrate with [Vigilant](https://govigilant.io), an all-in-one web monitoring tool which can be self-hosted.

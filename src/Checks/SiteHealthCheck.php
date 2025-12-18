@@ -106,6 +106,7 @@ class SiteHealthCheck extends Check
         /**
          * Replicate WP_Site_Health::perform_test() logic to keep filter compatibility.
          */
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Uses the core filter for compatibility.
         return apply_filters('site_status_test_result', call_user_func($callback));
     }
 

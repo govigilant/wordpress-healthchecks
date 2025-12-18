@@ -10,7 +10,9 @@ use Throwable;
 use Vigilant\HealthChecksBase\Checks\Check;
 use Vigilant\HealthChecksBase\Data\ResultData;
 use Vigilant\HealthChecksBase\Enums\Status;
-use function error_log;
+use function do_action;
+use function function_exists;
+use function sprintf;
 
 class RedisCheck extends Check
 {
@@ -40,7 +42,7 @@ class RedisCheck extends Check
         } catch (Throwable $exception) {
             $isHealthy = false;
             $message = 'Redis connection failed.';
-            error_log(sprintf('[Vigilant Healthchecks] Redis check failed: %s', $exception->getMessage()));
+            $this->reportException($exception);
         }
 
         return ResultData::make([
@@ -49,6 +51,15 @@ class RedisCheck extends Check
             'status' => $isHealthy ? Status::Healthy : Status::Unhealthy,
             'message' => $message,
         ]);
+    }
+
+    private function reportException(Throwable $exception): void
+    {
+        if (! function_exists('do_action')) {
+            return;
+        }
+
+        do_action('vigilant_healthchecks_check_exception', $this->type(), $exception);
     }
 
     public function available(): bool

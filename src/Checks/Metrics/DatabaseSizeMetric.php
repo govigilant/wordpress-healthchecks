@@ -9,17 +9,20 @@ use Vigilant\HealthChecksBase\Checks\Metric;
 use Vigilant\HealthChecksBase\Data\MetricData;
 use wpdb;
 use function apply_filters;
-use function error_log;
+use function do_action;
 use function function_exists;
 use function is_array;
 use function max;
 use function round;
-use function sprintf;
 use function time;
+use function wp_cache_get;
+use function wp_cache_set;
 
 class DatabaseSizeMetric extends Metric
 {
     protected string $type = 'database_size';
+
+    private const CACHE_GROUP = 'vigilant_healthchecks_database_size';
 
     /** @var array<string, array{value: float, expires_at: int}> */
     private static array $sizeCache = [];
@@ -88,8 +91,11 @@ class DatabaseSizeMetric extends Metric
         }
 
         $like = $wpdb->esc_like($prefix).'%';
-        $query = $wpdb->prepare('SHOW TABLE STATUS LIKE %s', $like);
-        $tables = $wpdb->get_results($query);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- SHOW TABLE STATUS requires direct DB access; results are cached via cacheTtl().
+        $tables = $wpdb->get_results(
+            $wpdb->prepare('SHOW TABLE STATUS LIKE %s', $like)
+        );
 
         if (! is_array($tables)) {
             throw new RuntimeException('SHOW TABLE STATUS returned an unexpected response.');
@@ -115,6 +121,12 @@ class DatabaseSizeMetric extends Metric
 
     private function getCachedSize(string $key): ?float
     {
+        $external = $this->getExternalCache($key);
+
+        if ($external !== null) {
+            return $external;
+        }
+
         $cache = self::$sizeCache[$key] ?? null;
 
         if ($cache === null) {
@@ -130,6 +142,21 @@ class DatabaseSizeMetric extends Metric
         return $cache['value'];
     }
 
+    private function getExternalCache(string $key): ?float
+    {
+        if (! function_exists('wp_cache_get')) {
+            return null;
+        }
+
+        $cached = wp_cache_get($key, self::CACHE_GROUP);
+
+        if ($cached === false) {
+            return null;
+        }
+
+        return (float) $cached;
+    }
+
     private function setCachedSize(string $key, float $value): void
     {
         $ttl = $this->cacheTtl();
@@ -142,6 +169,17 @@ class DatabaseSizeMetric extends Metric
             'value' => $value,
             'expires_at' => time() + $ttl,
         ];
+
+        $this->setExternalCache($key, $value, $ttl);
+    }
+
+    private function setExternalCache(string $key, float $value, int $ttl): void
+    {
+        if (! function_exists('wp_cache_set')) {
+            return;
+        }
+
+        wp_cache_set($key, $value, self::CACHE_GROUP, $ttl);
     }
 
     private function cacheTtl(): int
@@ -157,6 +195,10 @@ class DatabaseSizeMetric extends Metric
 
     private function logException(RuntimeException $exception): void
     {
-        error_log(sprintf('[Vigilant Healthchecks] Database size metric failed: %s', $exception->getMessage()));
+        if (! function_exists('do_action')) {
+            return;
+        }
+
+        do_action('vigilant_healthchecks_metric_exception', $this->type(), $exception);
     }
 }

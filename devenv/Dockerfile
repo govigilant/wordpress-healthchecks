@@ -1,4 +1,4 @@
-FROM wordpress:6.7.1-php8.2-fpm
+FROM wordpress:6.9-php8.4-fpm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip curl less default-mysql-client rsync \
